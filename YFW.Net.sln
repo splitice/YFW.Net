@@ -5,6 +5,8 @@ VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YFW.Net", "YFW.Net\YFW.Net.csproj", "{CAB9D094-6DEA-49A9-B8A1-7F327E51B112}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YFW.Net.Models", "YFW.Net.Models\YFW.Net.Models.csproj", "{D468D624-CBE0-46E6-A19C-EFFEAD60B065}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{CAB9D094-6DEA-49A9-B8A1-7F327E51B112}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CAB9D094-6DEA-49A9-B8A1-7F327E51B112}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CAB9D094-6DEA-49A9-B8A1-7F327E51B112}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D468D624-CBE0-46E6-A19C-EFFEAD60B065}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D468D624-CBE0-46E6-A19C-EFFEAD60B065}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D468D624-CBE0-46E6-A19C-EFFEAD60B065}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D468D624-CBE0-46E6-A19C-EFFEAD60B065}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

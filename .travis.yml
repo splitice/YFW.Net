@@ -10,6 +10,7 @@ install:
   
 script:
   - bash travis-ci/autoversion.sh YFW.Net
+  - bash travis-ci/autoversion.sh YFW.Net.Models
   - export EnableNuGetPackageRestore=false
   - mozroots --import --sync
   - travis_retry  mono .nuget/NuGet.exe restore YFW.Net.sln

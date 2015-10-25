@@ -6,7 +6,7 @@ using IPTables.Net.Iptables;
 
 namespace YFW.Net.Firewall
 {
-    internal class DynamicChainRegister
+    public class DynamicChainRegister
     {
         private Dictionary<Tuple<String, String, int>, IpTablesChain> _variables = new Dictionary<Tuple<String, String, int>, IpTablesChain>();
         private Dictionary<IpTablesChain, List<IpTablesRule>> _dynamicChains = new Dictionary<IpTablesChain, List<IpTablesRule>>();

@@ -46,6 +46,11 @@ namespace YFW.Net
             functions.LoadFunctions(_interpreter);
         }
 
+        public DynamicChainRegister Dcr
+        {
+            get { return _dcr; }
+        }
+
         private string DynamicLookup(string dynamicName, string subname)
         {
             if (_tableState == null)
@@ -53,12 +58,12 @@ namespace YFW.Net
                 return null;
             }
 
-            var chain = _dcr.GetByVariable(dynamicName, _tableState, _versionState);
+            var chain = Dcr.GetByVariable(dynamicName, _tableState, _versionState);
             if (chain == null)
             {
                 throw new Exception("Variable " + dynamicName + " not found");
             }
-            Debug.Assert(_dcr.IsDynamic(chain));
+            Debug.Assert(Dcr.IsDynamic(chain));
             var chainName = String.Format(chain.Name, subname);
 
             var createdChain = new IpTablesChain(chain.Table, chainName, chain.IpVersion, null);
@@ -71,7 +76,7 @@ namespace YFW.Net
             var ruleset = _ruleSets[chain.IpVersion];
 
             //Get chain rules, for all applicable tables and versions
-            var rules = _dcr.GetDynamicChainRules(chain, subname);
+            var rules = Dcr.GetDynamicChainRules(chain, subname);
             foreach (var r in rules)
             {
                 ruleset.AddRule(r);

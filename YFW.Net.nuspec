@@ -15,5 +15,6 @@
 	</metadata>
 	<files>
 		<file src="YFW.Net/bin/Release/YFW.Net.dll" target="lib" />
+		<file src="YFW.Net/bin/Release/YFW.Net.Models.dll" target="lib" />
 	</files>
 </package>
