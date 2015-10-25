@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Dynamic;
+using System.Linq;
 using SystemInteract;
 using DynamicExpresso;
+using IPTables.Net;
 using IPTables.Net.Iptables;
 using IPTables.Net.Iptables.Helpers;
 using YFW.Net.Firewall;
@@ -25,17 +27,23 @@ namespace YFW.Net
         private int _versionState;
         private Interpreter _interpreter;
 
-        public RuleBuilder(ISystemFactory system, String nfbpf, DynamicChainRegister dcr, Dictionary<int, IpTablesRuleSet> ruleSets)
+        public RuleBuilder(IpTablesSystem system, String nfbpf, Dictionary<int, IpTablesRuleSet> ruleSets, FunctionRegistry functions = null)
         {
-            _system = system;
+            if (functions == null)
+            {
+                functions = new FunctionRegistry();
+            }
+            _system = system.System;
             _nfbpf = nfbpf;
-            _dcr = dcr;
+            var chainsDict =
+                _ruleSets.Select((a) => new KeyValuePair<int, IpTablesChainSet>(a.Key, a.Value.Chains))
+                    .ToDictionary((a) => a.Key, (a) => a.Value);
+            _dcr = new DynamicChainRegister(system, chainsDict);
             _formatDb = new DynamicDictionary<object>(_mappings);
             _ruleSets = ruleSets;
             _interpreter = new Interpreter();
-            _interpreter.SetFunction("Check", new Func<object, bool>(CheckFunc));
-            _interpreter.SetFunction("ParseInt", new Func<object, int>((a) => int.Parse(a.ToString())));
             _interpreter.SetVariable("var", _mappings);
+            functions.LoadFunctions(_interpreter);
         }
 
         private string DynamicLookup(string dynamicName, string subname)
@@ -142,15 +150,6 @@ namespace YFW.Net
         public void DefineDynamicChain(string name)
         {
             _mappings.Add(name, new DynamicDictionaryCallback((a)=>DynamicLookup(name,a)));
-        }
-
-        private bool CheckFunc(object o)
-        {
-            if (o == null)
-            {
-                return false;
-            }
-            return o.ToString().Trim(new char[] {'0'}).Length == 0;
         }
 
         public bool IsConditionTrue(String condition)

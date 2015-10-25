@@ -6,19 +6,17 @@ using IPTables.Net.Iptables;
 
 namespace YFW.Net.Firewall
 {
-    public class DynamicChainRegister
+    internal class DynamicChainRegister
     {
         private Dictionary<Tuple<String, String, int>, IpTablesChain> _variables = new Dictionary<Tuple<String, String, int>, IpTablesChain>();
         private Dictionary<IpTablesChain, List<IpTablesRule>> _dynamicChains = new Dictionary<IpTablesChain, List<IpTablesRule>>();
         private IpTablesSystem _system;
-        private IpTablesChainSet _chains4;
-        private IpTablesChainSet _chains6;
+        private Dictionary<int,IpTablesChainSet> _chains;
 
-        public DynamicChainRegister(IpTablesSystem system, IpTablesChainSet chainsSet4, IpTablesChainSet chainSet6)
+        public DynamicChainRegister(IpTablesSystem system, Dictionary<int,IpTablesChainSet> chains)
         {
             _system = system;
-            _chains4 = chainsSet4;
-            _chains6 = chainSet6;
+            _chains = chains;
         }
 
         public void RegisterDynamicChain(String variable, String table, String chainName, int ipVersion)
@@ -65,7 +63,7 @@ namespace YFW.Net.Firewall
                 throw new Exception("Chain should be dynamic");
             }
 
-            var chains = chain.IpVersion == 4 ? _chains4 : _chains6;
+            var chains = _chains[chain.IpVersion];
 
             List<IpTablesRule> rules = new List<IpTablesRule>();
             foreach (var rule in _dynamicChains[chain])
