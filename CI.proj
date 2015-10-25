@@ -4,8 +4,8 @@
   <Target Name="CI" DependsOnTargets="Build" />
  
   <Target Name="Build">
-    <MSBuild Projects="QuadTrees.sln" Properties="Configuration=Debug;Platform=Any CPU" />
-    <MSBuild Projects="QuadTrees.sln" Properties="Configuration=Release;Platform=Any CPU" />
+    <MSBuild Projects="YFW.Net.sln" Properties="Configuration=Debug;Platform=Any CPU" />
+    <MSBuild Projects="YFW.Net.sln" Properties="Configuration=Release;Platform=Any CPU" />
   </Target>
  
 </Project>
