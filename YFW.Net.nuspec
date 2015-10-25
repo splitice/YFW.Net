@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package>
+	<metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+		<id>YFW.Net</id>
+		<version>$version$</version>
+		<title>YFW.Net</title>
+		<authors>SplitIce</authors>
+		<owners>SplitIce</owners>
+		<projectUrl>https://github.com/splitice/YFW.Net</projectUrl>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>Firewall management library</description>
+		<releaseNotes>Automatic Updates via GitHub</releaseNotes>
+		<copyright>Copyright Never</copyright>
+		<language>en-US</language>
+	</metadata>
+	<files>
+		<file src="YFW.Net/bin/Release/YFW.Net.dll" target="lib" />
+	</files>
+</package>
