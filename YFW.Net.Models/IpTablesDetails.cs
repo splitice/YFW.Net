@@ -5,6 +5,7 @@ namespace YFW.Net.Models
 {
     public class IpTablesDetails
     {
+        private List<IpSetDetails> _sets = new List<IpSetDetails>();
         private List<ChainDetails> _chains = new List<ChainDetails>();
         private List<RuleDetails> _rules = new List<RuleDetails>();
 
@@ -20,6 +21,13 @@ namespace YFW.Net.Models
         {
             get { return _rules; }
             set { _rules = value; }
+        }
+
+        [YamlMember(Alias = "ipset")]
+        public List<IpSetDetails> Sets
+        {
+            get { return _sets; }
+            set { _sets = value; }
         }
     }
 }

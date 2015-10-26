@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChainDetails.cs" />
+    <Compile Include="IpSetDetails.cs" />
     <Compile Include="IpTablesDetails.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RuleDetails.cs" />
