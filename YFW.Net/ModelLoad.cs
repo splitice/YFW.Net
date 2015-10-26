@@ -11,7 +11,7 @@ using YFW.Net.Models;
 
 namespace YFW.Net
 {
-    class ModelLoad
+    public class ModelLoad
     {
         private IpTablesSystem _iptables;
         private Dictionary<int, IpTablesRuleSet> _ruleSets;
