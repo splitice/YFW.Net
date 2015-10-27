@@ -9,6 +9,6 @@ namespace YFW.Net.Functions
     public interface IFwFunction
     {
         String Name { get; }
-        dynamic Process(object o);
+        Delegate GetDelegate();
     }
 }

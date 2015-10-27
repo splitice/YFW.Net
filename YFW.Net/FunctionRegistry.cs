@@ -30,7 +30,7 @@ namespace YFW.Net
         {
             foreach (var func in _functions)
             {
-                interpreter.SetFunction(func.Name, new Func<object, dynamic>(func.Process));
+                interpreter.SetFunction(func.Name, func.GetDelegate());
             }
         }
     }

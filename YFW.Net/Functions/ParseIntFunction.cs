@@ -12,9 +12,10 @@ namespace YFW.Net.Functions
         {
             get { return "ParseInt"; }
         }
-        public dynamic Process(object o)
+
+        public Delegate GetDelegate()
         {
-            return int.Parse(o.ToString());
+            return new Func<object, int>((o) => int.Parse(o.ToString()));
         }
     }
 }

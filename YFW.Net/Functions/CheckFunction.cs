@@ -12,13 +12,17 @@ namespace YFW.Net.Functions
         {
             get { return "Check"; }
         }
-        public dynamic Process(object o)
+
+        public Delegate GetDelegate()
         {
-            if (o == null)
+            return new Func<object, bool>((o) =>
             {
-                return false;
-            }
-            return o.ToString().Trim(new char[] { '0' }).Length == 0;
+                if (o == null)
+                {
+                    return false;
+                }
+                return o.ToString().Trim(new char[] { '0' }).Length == 0;
+            });
         }
     }
 }

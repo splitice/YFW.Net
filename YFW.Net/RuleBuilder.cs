@@ -163,7 +163,14 @@ namespace YFW.Net
             {
                 return true;
             }
-            return _interpreter.Eval<bool>(condition);
+            try
+            {
+                return _interpreter.Eval<bool>(condition);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(String.Format("An exception occured while evaluating condition: {0}",condition),ex);
+            }
         }
     }
 }
