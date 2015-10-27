@@ -36,7 +36,7 @@ namespace YFW.Net
             _system = system.System;
             _nfbpf = nfbpf;
             var chainsDict =
-                _ruleSets.Select((a) => new KeyValuePair<int, IpTablesChainSet>(a.Key, a.Value.Chains))
+                ruleSets.Select((a) => new KeyValuePair<int, IpTablesChainSet>(a.Key, a.Value.Chains))
                     .ToDictionary((a) => a.Key, (a) => a.Value);
             _dcr = new DynamicChainRegister(system, chainsDict);
             _formatDb = new DynamicDictionary<object>(_mappings);
