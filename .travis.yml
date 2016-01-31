@@ -1,19 +1,16 @@
-language: c
-
+language: csharp
+solution: YFW.Net.sln
+mono:
+  - latest
 git:
   depth: 300
-
-install:
-  - sudo add-apt-repository ppa:directhex/ppa -y
-  - sudo apt-get update
-  - sudo apt-get -qq install mono-devel mono-gmcs mono-utils mono-complete libmono-system2.0-cil libmono-corlib2.0-cil mono-2.0-gac nunit-console realpath
-  
 script:
-  - bash travis-ci/autoversion.sh YFW.Net
-  - bash travis-ci/autoversion.sh YFW.Net.Models
   - export EnableNuGetPackageRestore=false
   - mozroots --import --sync
-  - travis_retry  mono .nuget/NuGet.exe restore YFW.Net.sln
-  - xbuild CI.proj
+  - bash travis-ci/autoversion.sh YFW.Net
+  - bash travis-ci/autoversion.sh YFW.Net.Models
+  - travis_retry mono .nuget/NuGet.exe restore YFW.Net.sln
+  - xbuild /p:Configuration=Release YFW.Net.sln
+  - xbuild /p:Configuration=Debug YFW.Net.sln
 #  - sudo nunit-console -framework=4.0 ./QuadTrees.Tests/bin/Debug/QuadTrees.Tests.dll -exclude Integration,NotWorkingOnMono
   - travis_retry bash travis-ci/nuget-upload.sh
