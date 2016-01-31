@@ -53,12 +53,8 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="SystemInteract, Version=1.0.0.2, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\SystemInteract.1.0.0-cibuild0002\lib\SystemInteract.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="SystemInteract.Local, Version=1.0.0.2, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\SystemInteract.Local.1.0.0-cibuild0002\lib\SystemInteract.Local.dll</HintPath>
+    <Reference Include="SystemInteract.Local, Version=1.0.0.3, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\SystemInteract.Local.1.0.0-cibuild0003\lib\SystemInteract.Local.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>
