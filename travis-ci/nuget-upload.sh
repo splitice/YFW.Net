@@ -2,7 +2,7 @@
 
 set -e
 
-DIR=$(realpath $(dirname "$0"))
+DIR=$(dirname "$0")
 P=$DIR/../$1
 
 cd $P
