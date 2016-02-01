@@ -21,7 +21,7 @@ namespace YFW.Net.Functions
                 {
                     return false;
                 }
-                return o.ToString().Trim(new char[] { '0' }).Length == 0;
+                return o.ToString().Trim('0').Length != 0;
             });
         }
     }
