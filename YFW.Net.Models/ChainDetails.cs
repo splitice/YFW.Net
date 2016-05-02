@@ -12,6 +12,7 @@ namespace YFW.Net.Models
         private List<string> _tables = new List<string>(); 
         private List<int> _versions = new List<int>{4};
         private String _dynamic = null;
+        private List<String> _dynamicInit = new List<string>(); 
 
         public List<int> Versions
         {
@@ -63,6 +64,12 @@ namespace YFW.Net.Models
         public bool IsDynamic
         {
             get { return !String.IsNullOrEmpty(Dynamic); }
+        }
+
+        [YamlMember(Alias = "dynamic_init")]
+        public List<string> DynamicInit
+        {
+            get { return _dynamicInit; }
         }
 
         public ChainDetails()

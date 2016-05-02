@@ -129,6 +129,21 @@ namespace YFW.Net
             CreateChains(config, rb);
             CreateSets(config, rb);
             CreateRules(config, rb);
+            foreach (var c in config.Chains)
+            {
+                if (c.IsDynamic)
+                {
+                    var chains = _ruleSets.Select(
+                        (a) => a.Value.Chains.FirstOrDefault((d) => d.Name == c.Name && c.Tables.Contains(d.Table))).Where((a)=>a != null).ToList();
+                    foreach (var di in c.DynamicInit)
+                    {
+                        foreach (var cc in chains)
+                        {
+                            rb.Dcr.GetDynamicChainRules(cc, di);
+                        }
+                    }
+                }
+            }
         }
     }
 }

@@ -3,10 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Dynamic;
+using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Web;
-using System.Web.UI;
 using Microsoft.CSharp.RuntimeBinder;
 
 namespace YFW.Net.StringFormatter
@@ -175,16 +175,16 @@ namespace YFW.Net.StringFormatter
                     var callsite = CallSite<Func<CallSite, object, object>>.Create(binder);
                     return callsite.Target(callsite, container);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    
+                    throw new InvalidDataException("Property " + propName + " thew an exception", ex);
                 }
             }
 
             PropertyDescriptor prop = TypeDescriptor.GetProperties(container).Find(propName, true);
             if (prop == null)
             {
-                throw new HttpException("Property " + propName + " not found in " +
+                throw new InvalidDataException("Property " + propName + " not found in " +
                              container.GetType());
             }
 
@@ -206,11 +206,11 @@ namespace YFW.Net.StringFormatter
             if (container == null)
                 return null;
 
-            if (container is IDataItemContainer)
+            /*if (container is IDataItemContainer)
             {
                 foundDataItem = true;
                 return ((IDataItemContainer)container).DataItem;
-            }
+            }*/
 
             PropertyInfo pi = null;
             if (dataItemCache == null)

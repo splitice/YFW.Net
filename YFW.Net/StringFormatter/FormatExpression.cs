@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Web;
 
 namespace YFW.Net.StringFormatter
@@ -51,7 +52,8 @@ public class FormatExpression : ITextExpression
       return (DataBinder.Eval(o, Expression, "{0:" + Format + "}") 
           ?? string.Empty).ToString();
     }
-    catch (HttpException ex) {
+    catch (InvalidDataException ex)
+    {
       throw new FormatException("Invalid Format", ex);
     }
   }

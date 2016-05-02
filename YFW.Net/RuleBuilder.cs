@@ -28,6 +28,7 @@ namespace YFW.Net
         private string _tableState;
         private int _versionState;
         private Interpreter _interpreter;
+        private string _currentArg;
 
         public RuleBuilder(IpTablesSystem system, String nfbpf, Dictionary<int, IpTablesRuleSet> ruleSets, FunctionRegistry functions = null)
         {
@@ -52,12 +53,12 @@ namespace YFW.Net
         {
             get { return _dcr; }
         }
-
+ 
         private string DynamicLookup(string dynamicName, string subname)
         {
             if (_tableState == null)
             {
-                return null;
+                throw new Exception("Unexpected state");
             }
 
             var chain = Dcr.GetByVariable(dynamicName, _tableState, _versionState);

@@ -3,11 +3,11 @@ using System.Dynamic;
 
 namespace YFW.Net.Firewall.Dicts
 {
-    public class DynamicDictionaryCallback : DynamicObject
+    public class DynamicDictionaryCallback<T> : DynamicObject
     {
-        private Func<string, string> _cb;
+        private Func<string, T> _cb;
 
-        public DynamicDictionaryCallback(Func<String, String> cb)
+        public DynamicDictionaryCallback(Func<String, T> cb)
         {
             _cb = cb;
         }
@@ -16,7 +16,7 @@ namespace YFW.Net.Firewall.Dicts
             GetMemberBinder binder, out object result)
         {
             var r = _cb(binder.Name);
-            if (String.IsNullOrEmpty(r))
+            if (r == null)
             {
                 result = null;
                 return false;
@@ -29,6 +29,13 @@ namespace YFW.Net.Firewall.Dicts
             SetMemberBinder binder, object value)
         {
             return true;
+        }
+    }
+
+    public class DynamicDictionaryCallback : DynamicDictionaryCallback<string>
+    {
+        public DynamicDictionaryCallback(Func<string, string> cb) : base(cb)
+        {
         }
     }
 }
