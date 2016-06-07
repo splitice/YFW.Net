@@ -70,6 +70,7 @@ namespace YFW.Net.Models
         public List<string> DynamicInit
         {
             get { return _dynamicInit; }
+            set { _dynamicInit = value; }
         }
 
         public ChainDetails()
