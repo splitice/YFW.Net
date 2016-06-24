@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using IPTables.Net;
 using IPTables.Net.Iptables;
@@ -112,9 +114,42 @@ namespace YFW.Net
             foreach (var set in config.Sets)
             {
                 var ipset = new IpSetSet(IpSetTypeHelper.StringToType(set.Type), set.Name, 0, _iptables, IpSetSyncMode.SetAndEntries);
-                foreach (var entry in set.Entries)
+                List<String> resolved = set.Entries.ToList();
+
+                if (ipset.Type == IpSetType.HashIp)
                 {
-                    ipset.Entries.Add(IpSetEntry.ParseFromParts(ipset, rb.Format(entry)));
+                    List<IAsyncResult> tasks = new List<IAsyncResult>();
+                    for (int index = 0; index < resolved.Count; index++)
+                    {
+                        var entry = resolved[index];
+
+                        String entryIp = rb.Format(entry);
+                        IPAddress ip;
+                        if (!IPAddress.TryParse(entryIp, out ip))
+                        {
+                            var asyncResult = Dns.BeginGetHostAddresses(entryIp, (a) =>
+                            {
+                                var ips = Dns.EndGetHostAddresses(a);
+                                if (ips.Length == 0)
+                                {
+                                    throw new Exception("Unable to resolve: " + entryIp);
+                                }
+                                String entryIp2 = ips.First().ToString();
+                                resolved[(int) a.AsyncState] = entryIp2;
+                            }, index);
+                            tasks.Add(asyncResult);
+                        }
+                    }
+
+                    if (tasks.Any()) { 
+                        WaitHandle.WaitAll(tasks.Select((a) => a.AsyncWaitHandle).ToArray());
+                    }
+                }
+
+                foreach (var entry in resolved)
+                {
+                    String entryIp = rb.Format(entry);
+                    ipset.Entries.Add(IpSetEntry.ParseFromParts(ipset, entryIp));
                 }
                 _sets.AddSet(ipset);
             }
