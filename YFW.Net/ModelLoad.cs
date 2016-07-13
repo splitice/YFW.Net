@@ -114,12 +114,12 @@ namespace YFW.Net
             foreach (var set in config.Sets)
             {
                 var ipset = new IpSetSet(IpSetTypeHelper.StringToType(set.Type), set.Name, 0, _iptables, IpSetSyncMode.SetAndEntries);
-                List<String> resolved = set.Entries.ToList();
+                String[] resolved = set.Entries.ToArray();
 
                 if (ipset.Type == IpSetType.HashIp)
                 {
                     List<IAsyncResult> tasks = new List<IAsyncResult>();
-                    for (int index = 0; index < resolved.Count; index++)
+                    for (int index = 0; index < resolved.Length; index++)
                     {
                         var entry = resolved[index];
 
@@ -146,8 +146,9 @@ namespace YFW.Net
                     }
                 }
 
-                foreach (var entry in resolved)
+                for (int index = 0; index < resolved.Length; index++)
                 {
+                    var entry = resolved[index];
                     String entryIp = rb.Format(entry);
                     ipset.Entries.Add(IpSetEntry.ParseFromParts(ipset, entryIp));
                 }
