@@ -37,7 +37,11 @@ namespace YFW.Net
                 }
                 else if (e.Value.Language == "bpf")
                 {
-                    rb.DefineByBpf(e.Key, e.Value.Command);
+                    rb.DefineByBpf(e.Key, "RAW", e.Value.Command);
+                }
+                else if (e.Value.Language == "bpfl4")
+                {
+                    rb.DefineByBpf(e.Key, "RAW_TRANSPORT", e.Value.Command);
                 }
                 else if (e.Value.Language == "text")
                 {

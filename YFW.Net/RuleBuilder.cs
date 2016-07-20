@@ -10,6 +10,7 @@ using DynamicExpresso;
 using IPTables.Net;
 using IPTables.Net.Iptables;
 using IPTables.Net.Iptables.Helpers;
+using IPTables.Net.Iptables.NativeLibrary;
 using YFW.Net.Firewall;
 using YFW.Net.Firewall.Dicts;
 using YFW.Net.StringFormatter;
@@ -133,9 +134,9 @@ namespace YFW.Net
             return result;
         }
 
-        public void DefineByBpf(string key, string command)
+        public void DefineByBpf(string key, string dltName, string command)
         {
-            String result = CompileBpf(command);
+            String result = CompileBpf(dltName, command);
             _mappings.Add(key, result);
         }
 
@@ -144,15 +145,24 @@ namespace YFW.Net
             _mappings.Add(key, value);
         }
 
-        public string CompileBpf(string command)
+        public string CompileBpf(string dltName, string code)
         {
             String error;
-            return CompileBpf(command, out error);
+            return CompileBpf(dltName, code, out error);
         }
 
-        public string CompileBpf(string command, out String error)
+        public string CompileBpf(string dltName, string code, out String error)
         {
-            return ExecuteBash(_nfbpf + " RAW " + ShellHelper.EscapeArguments(command), out error);
+            if (IptcInterface.DllExists())
+            {
+                String ret = IptcInterface.BpfCompile(dltName, code, code.Length*10);
+                if (!String.IsNullOrEmpty(ret))
+                {
+                    error = null;
+                    return ret;
+                }
+            }
+            return ExecuteBash(_nfbpf + " " + dltName + " " + ShellHelper.EscapeArguments(code), out error);
         }
 
         public void DefineDynamicChain(string name)
