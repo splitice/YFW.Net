@@ -150,11 +150,18 @@ namespace YFW.Net
                     }
                 }
 
+                //Check Uniqueness
+                HashSet<IpSetEntry> ipsetEntries = new HashSet<IpSetEntry>();
+
                 for (int index = 0; index < resolved.Length; index++)
                 {
                     var entry = resolved[index];
                     String entryIp = rb.Format(entry);
-                    ipset.Entries.Add(IpSetEntry.ParseFromParts(ipset, entryIp));
+                    var setEntry = IpSetEntry.ParseFromParts(ipset, entryIp);
+                    if (ipsetEntries.Add(setEntry))
+                    {
+                        ipset.Entries.Add(setEntry);
+                    }
                 }
                 _sets.AddSet(ipset);
             }

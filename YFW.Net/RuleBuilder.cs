@@ -155,9 +155,10 @@ namespace YFW.Net
         {
             if (IptcInterface.DllExists())
             {
-                String ret = IptcInterface.BpfCompile(dltName, code, code.Length*10);
+                String ret = IptcInterface.BpfCompile(dltName, code, 2048 + code.Length*10);
                 if (!String.IsNullOrEmpty(ret))
                 {
+                    //Console.WriteLine(ret);
                     error = null;
                     return ret;
                 }
