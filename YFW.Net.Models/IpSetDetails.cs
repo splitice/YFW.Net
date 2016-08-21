@@ -10,6 +10,7 @@ namespace YFW.Net.Models
         private List<String> _entries;
         private String _handler;
         private String _type;
+        private String _family = "inet";
 
         [YamlMember(Alias = "handler")]
         public string Handler
@@ -37,6 +38,13 @@ namespace YFW.Net.Models
         {
             get { return _type; }
             set { _type = value; }
+        }
+
+        [YamlMember(Alias = "family")]
+        public string Family
+        {
+            get { return _family; }
+            set { _family = value; }
         }
     }
 }

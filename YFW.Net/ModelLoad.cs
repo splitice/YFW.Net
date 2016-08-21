@@ -117,7 +117,7 @@ namespace YFW.Net
         {
             foreach (var set in config.Sets)
             {
-                var ipset = new IpSetSet(IpSetTypeHelper.StringToType(set.Type), set.Name, 0, _iptables, IpSetSyncMode.SetAndEntries);
+                var ipset = new IpSetSet(IpSetTypeHelper.StringToType(set.Type), set.Name, 0, set.Family, _iptables, IpSetSyncMode.SetAndEntries);
                 String[] resolved = set.Entries.ToArray();
 
                 if (ipset.Type == IpSetType.HashIp)
