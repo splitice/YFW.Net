@@ -49,7 +49,7 @@ namespace YFW.Net
                     throw new Exception("Invalid language: " + e.Value.Language);
                 }
                 return e;
-            }).AsSequential();
+            });
 
             foreach (var e in mappings)
             {
@@ -101,7 +101,10 @@ namespace YFW.Net
 
         private void CreateRules(IpTablesDetails config, RuleBuilder rb)
         {
-            var rulesParsed = config.Rules.AsParallel().Where((c) => rb.IsConditionTrue(c.Condition)).SelectMany((c) => ParseAll(rb, c)).AsSequential();
+            var rulesParsed =
+                config.Rules.AsParallel()
+                    .Where((c) => rb.IsConditionTrue(c.Condition))
+                    .SelectMany((c) => ParseAll(rb, c));
 
             foreach(var rule in rulesParsed)
             {
