@@ -89,16 +89,17 @@ namespace YFW.Net
         private IEnumerable<IpTablesRule> ParseAll(RuleBuilder rb, RuleDetails c)
         {
             var rule = c.Rule;
-            foreach (var v in c.Versions)
+            if (rule.Contains("{"))
             {
-                var rules = _ruleSets[v];
-                foreach (var t in c.Tables)
+                foreach (var v in c.Versions)
                 {
-                    IpTablesRule.ChainCreateMode chainMode = IpTablesRule.ChainCreateMode.DontCreateErrorInstead;
-                    if (rule.Contains("{"))
+                    var rules = _ruleSets[v];
+                    foreach (var t in c.Tables)
                     {
+                        IpTablesRule.ChainCreateMode chainMode = IpTablesRule.ChainCreateMode.DontCreateErrorInstead;
+                        rule = c.Rule;
                         string formattedRule;
-                        lock(_dynamicLock)
+                        lock (_dynamicLock)
                         {
                             formattedRule = rb.Format(rule, t, v);
                         }
@@ -107,9 +108,34 @@ namespace YFW.Net
                             rule = formattedRule;
                             chainMode = IpTablesRule.ChainCreateMode.ReturnNewChain;
                         }
-                    }
 
-                    yield return IpTablesRule.Parse(rule, _iptables, rules.Chains, v, t, chainMode);
+                        yield return IpTablesRule.Parse(rule, _iptables, rules.Chains, v, t, chainMode);
+                    }
+                }
+            }
+            else
+            {
+                IpTablesRule ruleTemplate = null;
+
+                foreach (var v in c.Versions)
+                {
+                    var chains = _ruleSets[v].Chains;
+                    foreach (var t in c.Tables)
+                    {
+                        if (ruleTemplate == null)
+                        {
+                            ruleTemplate = IpTablesRule.Parse(rule, _iptables, chains, v, t,
+                                IpTablesRule.ChainCreateMode.DontCreateErrorInstead);
+                            yield return ruleTemplate;
+                        }
+                        else
+                        {
+                            //TODO: IPTables Rule clone
+                            var theRule = new IpTablesRule(ruleTemplate);
+                            theRule.Chain = chains.GetChainOrDefault(ruleTemplate.Chain.Name, t);
+                            yield return theRule;
+                        }
+                    }
                 }
             }
         } 
