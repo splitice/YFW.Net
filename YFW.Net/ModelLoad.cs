@@ -94,7 +94,7 @@ namespace YFW.Net
                 var rules = _ruleSets[v];
                 foreach (var t in c.Tables)
                 {
-                    bool dynamic = false;
+                    IpTablesRule.ChainCreateMode chainMode = IpTablesRule.ChainCreateMode.DontCreateErrorInstead;
                     if (rule.Contains("{"))
                     {
                         string formattedRule;
@@ -105,20 +105,11 @@ namespace YFW.Net
                         if (formattedRule != rule)
                         {
                             rule = formattedRule;
-                            dynamic = true;
+                            chainMode = IpTablesRule.ChainCreateMode.ReturnNewChain;
                         }
                     }
 
-                    if (dynamic)
-                    {
-                        yield return IpTablesRule.Parse(rule, _iptables, rules.Chains,
-                            v, t, IpTablesRule.ChainCreateMode.ReturnNewChain);
-                    }
-                    else
-                    {
-                        yield return IpTablesRule.Parse(rule, _iptables, rules.Chains,
-                            v, t, IpTablesRule.ChainCreateMode.DontCreateErrorInstead);
-                    }
+                    yield return IpTablesRule.Parse(rule, _iptables, rules.Chains, v, t, chainMode);
                 }
             }
         } 
