@@ -122,27 +122,15 @@ namespace YFW.Net
             return output.TrimEnd(new char[]{'\n'});
         }
 
-        public string DefineByBash(String name, String code, String def = "")
+        public string DefineMapping(String name, String value, String @default = "")
         {
-            String result = ExecuteBash(code);
-            _mappings.Add(name, result);
-            if (String.IsNullOrEmpty(result.Trim()))
+            value = value.Trim();
+            if (string.IsNullOrEmpty(value))
             {
-                _mappings[name] = def;
-                result = def;
+                value = @default;
             }
-            return result;
-        }
-
-        public void DefineByBpf(string key, string dltName, string command)
-        {
-            String result = CompileBpf(dltName, command);
-            _mappings.Add(key, result);
-        }
-
-        public void DefineByText(string key, string value)
-        {
-            _mappings.Add(key, value);
+            _mappings.Add(name, value);
+            return value;
         }
 
         public string CompileBpf(string dltName, string code)
@@ -171,6 +159,7 @@ namespace YFW.Net
             _mappings.Add(name, new DynamicDictionaryCallback((a)=>DynamicLookup(name,a)));
         }
 
+        private Dictionary<String, Lambda> _conditionalCache = new Dictionary<string, Lambda>();
         public bool IsConditionTrue(String condition)
         {
             if (String.IsNullOrWhiteSpace(condition))
@@ -179,7 +168,16 @@ namespace YFW.Net
             }
             try
             {
-                return _interpreter.Eval<bool>(condition);
+                Lambda lambda;
+                lock (_conditionalCache)
+                {
+                    if (!_conditionalCache.TryGetValue(condition, out lambda))
+                    {
+                        lambda = _interpreter.Parse(condition);
+                        _conditionalCache.Add(condition, lambda);
+                    }
+                }
+                return (bool)lambda.Invoke();
             }
             catch (Exception ex)
             {

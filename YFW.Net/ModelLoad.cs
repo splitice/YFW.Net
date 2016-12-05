@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -29,28 +30,30 @@ namespace YFW.Net
         private RuleBuilder InitEnvironment(Dictionary<String, EnvironmentDetails> environment)
         {
             RuleBuilder rb = new RuleBuilder(_iptables, "/var/x4b/bin/bpf/nfbpf_compile", _ruleSets);
-            foreach (var e in environment)
+            var mappings = environment.AsParallel().Select((e) =>
             {
                 if (e.Value.Language == "bash")
                 {
-                    rb.DefineByBash(e.Key, e.Value.Command, e.Value.Default);
+                    e.Value.Command = rb.ExecuteBash(e.Value.Command);
                 }
                 else if (e.Value.Language == "bpf")
                 {
-                    rb.DefineByBpf(e.Key, "RAW", e.Value.Command);
+                    e.Value.Command = rb.CompileBpf("RAW", e.Value.Command);
                 }
                 else if (e.Value.Language == "bpfl4")
                 {
-                    rb.DefineByBpf(e.Key, "RAW_TRANSPORT", e.Value.Command);
+                    e.Value.Command = rb.CompileBpf("RAW_TRANSPORT", e.Value.Command);
                 }
-                else if (e.Value.Language == "text")
-                {
-                    rb.DefineByText(e.Key, e.Value.Command);
-                }
-                else
+                else if (e.Value.Language != "text")
                 {
                     throw new Exception("Invalid language: " + e.Value.Language);
                 }
+                return e;
+            }).AsSequential();
+
+            foreach (var e in mappings)
+            {
+                rb.DefineMapping(e.Key, e.Value.Command, e.Value.Default);
             }
             return rb;
         }
@@ -66,49 +69,56 @@ namespace YFW.Net
                 foreach (var v in c.Versions)
                 {
                     var rules = _ruleSets[v];
+                    var chains = rules.Chains;
                     foreach (var t in c.Tables)
                     {
                         if (c.IsDynamic)
                         {
                             rb.Dcr.RegisterDynamicChain(c.Dynamic, t, c.Name, v);
                         }
-                        else if (!rules.Chains.HasChain(c.Name, t))
+                        else if (!chains.HasChain(c.Name, t))
                         {
-                            rules.AddChain(c.Name, t);
+                            chains.AddChain(c.Name, t, _iptables);
                         }
                     }
                 }
             }
         }
 
+        private IEnumerable<IpTablesRule> ParseAll(RuleBuilder rb, RuleDetails c)
+        {
+            foreach (var v in c.Versions)
+            {
+                var rules = _ruleSets[v];
+                foreach (var t in c.Tables)
+                {
+                    var rule = IpTablesRule.Parse(rb.Format(c.Rule, t, v), _iptables, rules.Chains,
+                        v, t, IpTablesRule.ChainCreateMode.ReturnNewChain);
+                    yield return rule;
+                }
+            }
+        } 
+
         private void CreateRules(IpTablesDetails config, RuleBuilder rb)
         {
-            foreach (var c in config.Rules)
+            var rulesParsed = config.Rules.AsParallel().Where((c) => rb.IsConditionTrue(c.Condition)).SelectMany((c) => ParseAll(rb, c)).AsSequential();
+
+            foreach(var rule in rulesParsed)
             {
-                if (rb.IsConditionTrue(c.Condition))
+                if (rb.Dcr.IsDynamic(rule.Chain))
                 {
-                    foreach (var v in c.Versions)
+                    rb.Dcr.AddRule(rule);
+                }
+                else
+                {
+                    var chains = _ruleSets[rule.IpVersion].Chains;
+                    var chain = chains.GetChainOrDefault(rule.Chain.Name, rule.Chain.Table);
+                    if (chain == null)
                     {
-                        var rules = _ruleSets[v];
-                        foreach (var t in c.Tables)
-                        {
-                            var rule = IpTablesRule.Parse(rb.Format(c.Rule, t, v), _iptables, rules.Chains,
-                                v, t, IpTablesRule.ChainCreateMode.ReturnNewChain);
-                            if (rb.Dcr.IsDynamic(rule.Chain))
-                            {
-                                rb.Dcr.AddRule(rule);
-                            }
-                            else
-                            {
-                                if (!rules.Chains.HasChain(rule.Chain.Name, rule.Chain.Table))
-                                {
-                                    throw new Exception(String.Format("Chain was not created ipv{0},{1}:{2}",
-                                        rule.Chain.IpVersion, rule.Chain.Table, rule.Chain.Name));
-                                }
-                                rules.AddRule(rule);
-                            }
-                        }
+                        throw new Exception(String.Format("Chain was not created ipv{0},{1}:{2}",
+                            rule.Chain.IpVersion, rule.Chain.Table, rule.Chain.Name));
                     }
+                    chain.AddRule(rule);
                 }
             }
         }
