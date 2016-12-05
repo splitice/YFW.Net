@@ -102,7 +102,7 @@ namespace YFW.Net
         private void CreateRules(IpTablesDetails config, RuleBuilder rb)
         {
             var rulesParsed =
-                config.Rules.AsParallel()
+                config.Rules.AsParallel().AsOrdered()
                     .Where((c) => rb.IsConditionTrue(c.Condition))
                     .SelectMany((c) => ParseAll(rb, c));
 
