@@ -85,42 +85,73 @@ namespace YFW.Net
             }
         }
 
+        private object _dynamicLock = new object();
         private IEnumerable<IpTablesRule> ParseAll(RuleBuilder rb, RuleDetails c)
         {
+            var rule = c.Rule;
             foreach (var v in c.Versions)
             {
                 var rules = _ruleSets[v];
                 foreach (var t in c.Tables)
                 {
-                    var rule = IpTablesRule.Parse(rb.Format(c.Rule, t, v), _iptables, rules.Chains,
-                        v, t, IpTablesRule.ChainCreateMode.ReturnNewChain);
-                    yield return rule;
+                    bool dynamic = false;
+                    if (rule.Contains("{"))
+                    {
+                        string formattedRule;
+                        lock(_dynamicLock)
+                        {
+                            formattedRule = rb.Format(rule, t, v);
+                        }
+                        if (formattedRule != rule)
+                        {
+                            rule = formattedRule;
+                            dynamic = true;
+                        }
+                    }
+
+                    if (dynamic)
+                    {
+                        yield return IpTablesRule.Parse(rule, _iptables, rules.Chains,
+                            v, t, IpTablesRule.ChainCreateMode.ReturnNewChain);
+                    }
+                    else
+                    {
+                        yield return IpTablesRule.Parse(rule, _iptables, rules.Chains,
+                            v, t, IpTablesRule.ChainCreateMode.DontCreateErrorInstead);
+                    }
                 }
             }
         } 
 
         private void CreateRules(IpTablesDetails config, RuleBuilder rb)
         {
-            var rulesParsed =
-                config.Rules.AsParallel().AsOrdered()
-                    .Where((c) => rb.IsConditionTrue(c.Condition))
-                    .SelectMany((c) => ParseAll(rb, c));
+            var rules = config.Rules.AsParallel().AsOrdered()
+                .Where((c) => rb.IsConditionTrue(c.Condition))
+                .SelectMany((c) => ParseAll(rb, c)).AsSequential();
 
-            foreach(var rule in rulesParsed)
-            {
-                if (rb.Dcr.IsDynamic(rule.Chain))
+            foreach(var rule in rules){
+                lock (_dynamicLock)
                 {
-                    rb.Dcr.AddRule(rule);
-                }
-                else
-                {
-                    var chains = _ruleSets[rule.IpVersion].Chains;
-                    var chain = chains.GetChainOrDefault(rule.Chain.Name, rule.Chain.Table);
-                    if (chain == null)
+                    if (rb.Dcr.IsDynamic(rule.Chain))
                     {
-                        throw new Exception(String.Format("Chain was not created ipv{0},{1}:{2}",
-                            rule.Chain.IpVersion, rule.Chain.Table, rule.Chain.Name));
+                        rb.Dcr.AddRule(rule);
+                        return;
                     }
+                }
+
+                var chains = _ruleSets[rule.IpVersion].Chains;
+                IpTablesChain chain;
+                lock (chains)
+                {
+                    chain = chains.GetChainOrDefault(rule.Chain.Name, rule.Chain.Table);
+                }
+                if (chain == null)
+                {
+                    throw new Exception(String.Format("Chain was not created ipv{0},{1}:{2}",
+                        rule.Chain.IpVersion, rule.Chain.Table, rule.Chain.Name));
+                }
+                lock (chain)
+                {
                     chain.AddRule(rule);
                 }
             }

@@ -146,7 +146,6 @@ namespace YFW.Net
                 String ret = IptcInterface.BpfCompile(dltName, code, 2048 + code.Length*10);
                 if (!String.IsNullOrEmpty(ret))
                 {
-                    //Console.WriteLine(ret);
                     error = null;
                     return ret;
                 }
