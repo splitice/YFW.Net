@@ -94,6 +94,7 @@ namespace YFW.Net
                 foreach (var v in c.Versions)
                 {
                     var rules = _ruleSets[v];
+
                     foreach (var t in c.Tables)
                     {
                         IpTablesRule.ChainCreateMode chainMode = IpTablesRule.ChainCreateMode.DontCreateErrorInstead;
@@ -152,7 +153,7 @@ namespace YFW.Net
                     if (rb.Dcr.IsDynamic(rule.Chain))
                     {
                         rb.Dcr.AddRule(rule);
-                        return;
+                        continue;
                     }
                 }
 
