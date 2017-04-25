@@ -3,9 +3,12 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using ARSoft.Tools.Net;
+using ARSoft.Tools.Net.Dns;
 using IPTables.Net;
 using IPTables.Net.Iptables;
 using IPTables.Net.Iptables.IpSet;
@@ -19,6 +22,8 @@ namespace YFW.Net
         private IpTablesSystem _iptables;
         private Dictionary<int, IpTablesRuleSet> _ruleSets;
         private IpSetSets _sets;
+
+        private DnsClient _dns = DnsClient.Default;
 
         public ModelLoad(IpTablesSystem iptables, Dictionary<int, IpTablesRuleSet> ruleSets, IpSetSets sets)
         {
@@ -175,6 +180,21 @@ namespace YFW.Net
             }
         }
 
+
+        private Action<Task<DnsMessage>> CompleteLambda(int index, string[] resolved)
+        {
+            return (task) =>
+            {
+                var result = task.Result;
+                var ips = result.AnswerRecords;
+                if (ips.Any((a)=>a is ARecord))
+                {
+                    String entryIp2 = (ips.First(a => a is ARecord) as ARecord).Address.ToString();
+                    resolved[index] = entryIp2;
+                }
+            };
+        }
+
         private void CreateSets(IpTablesDetails config, RuleBuilder rb)
         {
             foreach (var set in config.Sets)
@@ -184,31 +204,37 @@ namespace YFW.Net
 
                 if (ipset.Type == IpSetType.HashIp)
                 {
-                    List<IAsyncResult> tasks = new List<IAsyncResult>();
+                    IPAddress ip;
+                    int retries = 0;
+                    do
+                    {
+                        List<Task> tasks = new List<Task>();
+                        for (int index = 0; index < resolved.Length; index++)
+                        {
+                            var entry = resolved[index];
+
+                            String entryIp = rb.Format(entry);
+                            if (!IPAddress.TryParse(entryIp, out ip))
+                            {
+                                var asyncResult = _dns.ResolveAsync(DomainName.Parse(entryIp)).ContinueWith(CompleteLambda(index, resolved));
+                                tasks.Add(asyncResult);
+                            }
+                        }
+
+                        if (tasks.Any())
+                        {
+                            Task.WaitAll(tasks.ToArray());
+                        }
+                    } while (++retries <= 3 && resolved.Any((entry) => !IPAddress.TryParse(rb.Format(entry), out ip)));
                     for (int index = 0; index < resolved.Length; index++)
                     {
                         var entry = resolved[index];
 
                         String entryIp = rb.Format(entry);
-                        IPAddress ip;
                         if (!IPAddress.TryParse(entryIp, out ip))
                         {
-                            var asyncResult = Dns.BeginGetHostAddresses(entryIp, (a) =>
-                            {
-                                var ips = Dns.EndGetHostAddresses(a);
-                                if (ips.Length == 0)
-                                {
-                                    throw new Exception("Unable to resolve: " + entryIp);
-                                }
-                                String entryIp2 = ips.First().ToString();
-                                resolved[(int) a.AsyncState] = entryIp2;
-                            }, index);
-                            tasks.Add(asyncResult);
+                            throw new Exception("Unable to resolve "+entryIp);
                         }
-                    }
-
-                    if (tasks.Any()) { 
-                        WaitHandle.WaitAll(tasks.Select((a) => a.AsyncWaitHandle).ToArray());
                     }
                 }
 
