@@ -186,11 +186,15 @@ namespace YFW.Net
             return (task) =>
             {
                 var result = task.Result;
+                if (result == null) return;
                 var ips = result.AnswerRecords;
-                if (ips.Any((a)=>a is ARecord))
+                if (ips != null && ips.Any((a)=>a is ARecord))
                 {
                     String entryIp2 = (ips.First(a => a is ARecord) as ARecord).Address.ToString();
-                    resolved[index] = entryIp2;
+                    lock (resolved)
+                    {
+                        resolved[index] = entryIp2;
+                    }
                 }
             };
         }
