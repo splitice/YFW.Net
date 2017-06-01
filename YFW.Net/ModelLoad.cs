@@ -25,11 +25,15 @@ namespace YFW.Net
 
         private DnsClient _dns = DnsClient.Default;
 
-        public ModelLoad(IpTablesSystem iptables, Dictionary<int, IpTablesRuleSet> ruleSets, IpSetSets sets)
+        public ModelLoad(IpTablesSystem iptables, Dictionary<int, IpTablesRuleSet> ruleSets, IpSetSets sets, DnsClient dns = null)
         {
             _iptables = iptables;
             _ruleSets = ruleSets;
             _sets = sets;
+            if (dns != null)
+            {
+                _dns = dns;
+            }
         }
 
         private RuleBuilder InitEnvironment(Dictionary<String, EnvironmentDetails> environment)
