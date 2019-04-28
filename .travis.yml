@@ -4,6 +4,10 @@ mono:
   - latest
 git:
   depth: 300
+addons:
+  apt:
+    packages:
+    - realpath
 script:
   - export EnableNuGetPackageRestore=false
   - mozroots --import --sync
