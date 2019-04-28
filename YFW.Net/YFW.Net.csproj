@@ -51,9 +51,8 @@
       <HintPath>..\packages\DynamicExpresso.Core.1.3.1.0\lib\net40\DynamicExpresso.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="IPTables.Net, Version=0.4.0.7, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\IPTables.Net.0.4.1-cibuild0007\lib\IPTables.Net.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="IPTables.Net, Version=0.4.1.27, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\IPTables.Net.0.4.2-cibuild0027\lib\IPTables.Net.dll</HintPath>
     </Reference>
     <Reference Include="LukeSkywalker.IPNetwork, Version=1.3.2.0, Culture=neutral, PublicKeyToken=764160545cf0d618, processorArchitecture=MSIL">
       <HintPath>..\packages\IPNetwork.1.3.2.0\lib\LukeSkywalker.IPNetwork.dll</HintPath>
