@@ -60,13 +60,18 @@ namespace YFW.Net.Firewall
         {
             if (!IsDynamic(chain))
             {
-                throw new Exception("Chain should be dynamic");
+                throw new Exception("Chain "+chain.Name+" should be dynamic");
             }
 
             var chains = _chains[chain.IpVersion];
 
             List<IpTablesRule> rules = new List<IpTablesRule>();
-            foreach (var rule in _dynamicChains[chain])
+            var targetTemplate = _dynamicChains[chain];
+            if (targetTemplate.Count == 0)
+            {
+                throw new Exception("Chain " + chain.Name + " should have rules");
+            }
+            foreach (var rule in targetTemplate)
             {
                 var formatted = String.Format(rule.GetActionCommand(), arg);
                 var newRule = IpTablesRule.Parse(formatted, _system, chains, rule.Chain.IpVersion,
