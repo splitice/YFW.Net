@@ -224,7 +224,12 @@ namespace YFW.Net
                             String entryIp = rb.Format(entry);
                             if (!IPAddress.TryParse(entryIp, out ip))
                             {
-                                var asyncResult = _dns.ResolveAsync(DomainName.Parse(entryIp)).ContinueWith(CompleteLambda(index, resolved));
+                                DomainName domain;
+                                if (!DomainName.TryParse(entryIp, out domain))
+                                {
+                                    throw new Exception("Unable to parse domain " + entryIp);
+                                }
+                                var asyncResult = _dns.ResolveAsync(domain).ContinueWith(CompleteLambda(index, resolved));
                                 tasks.Add(asyncResult);
                             }
                         }
